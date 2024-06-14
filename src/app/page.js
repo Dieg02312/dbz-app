@@ -1,95 +1,78 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import SearchBar from "./components/SearchBar/SearchBar";
+import DynamicTabs from './components/Tabs/Tabs'
+
 
 export default function Home() {
+
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [selectedPlanet, setSelectedPlanet] = useState(null);
+  const [selectedTransfor, setSelectedTransfor] = useState(null);
+  const [characters, setCharacters] = useState([]);
+  const [planets, setPlanets] = useState([]);
+  const [transformations, setTransformations] = useState([]);
+
+  // Función para manejar la selección de un personaje
+  const handleSelect = (character) => {
+    setSelectedCharacter(character);
+  };
+  const handlePlanet = (planet) => {
+    setSelectedPlanet(planet);
+  };
+  const handleTransfor = (transformation) => {
+    setSelectedTransfor(transformation);
+  };
+
+  useEffect(() => {
+    axios.get('https://dragonball-api.com/api/characters/')
+      .then(response => {
+        setCharacters(response.data.items);
+      })
+      .catch(error => {
+        console.error('Error fetching characters:', error);
+      });
+
+    axios.get('https://dragonball-api.com/api/planets/')
+      .then(response => {
+        setPlanets(response.data.items);
+      })
+      .catch(error => {
+        console.error('Error fetching planets:', error);
+      });
+
+      axios.get('https://dragonball-api.com/api/transformations/')
+      .then(response => {
+         setTransformations(response.data);
+      })
+      .catch(error => {
+         console.error('Error fetching transformations:', error);
+      });
+
+  }, []);
+
+  const handleClear = () => {
+    setSelectedCharacter(null);
+    setSelectedPlanet(null);
+    setSelectedTransfor(null); // Establecer selectedCharacter en null
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <div>
+      <SearchBar
+        onCharacterSelect={handleSelect}
+        onPlanetSelect={handlePlanet}
+        onTransforSelect={handleTransfor}
+        onClear={handleClear} />
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <section className='container mb-5'>
+        <DynamicTabs
+          characters={selectedCharacter ? [selectedCharacter[0]] : characters}
+          planets={selectedPlanet ? selectedPlanet : planets}
+          transformations={selectedTransfor ? selectedTransfor : transformations} />
+      </section>
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
